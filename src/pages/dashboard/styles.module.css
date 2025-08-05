@@ -41,3 +41,75 @@
   padding: 12px 0;
   font-size: 18px;
 }
+
+.taskContainer{
+  margin: 34px auto 0 auto;
+  padding: 0 18px;
+  width: 100%;
+  max-width: 1024px;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.taskContainer a{
+  text-decoration: none;
+  color: #0f0f0f;
+}
+
+.taskContainer h1{
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 14px;
+}
+
+.task{
+  margin-bottom:14px ;
+  line-height: 150%;
+  border: 1.5px solid #909090;
+  border-radius: 4px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+}
+
+.tagContainer{
+  display: flex;
+  align-items: center;
+}
+
+.tag{
+  background-color: #3183ff;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.shareButton{
+  background: transparent;
+  border: 0;
+  margin: 0 8px;
+  cursor: pointer;
+}
+
+.taskContent{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.taskContent p{
+  font-size: 18px;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.tashButton{
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
