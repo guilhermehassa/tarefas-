@@ -6,9 +6,9 @@ import {getSession, useSession} from 'next-auth/react';
 import {FiShare2} from 'react-icons/fi';
 import {FaTrash} from 'react-icons/fa';
 import Head from 'next/head';
-
+import Link from 'next/link';
 import { db } from '@/services/firebaseConnection'; // Ensure this import is correct based on your project structure
-import { collection, addDoc, query, orderBy, where, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, where, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
 
 interface DashboardProps {
   user: {
@@ -84,9 +84,17 @@ export default function Dashboard({user}:DashboardProps) {
     }
   }
 
+  async function handleShare(id: string) {
+    await navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_URL}/task/${id}`);
+    alert('Link copiado com sucesso!');
+  }
 
-  
- 
+  async function handleDelete(id: string) {
+    const docRef = doc(db, `tasks`, id);
+    await deleteDoc(docRef);
+    alert('Tarefa deletada com sucesso!');
+  }
+
   return (
     <>
       <Head>
@@ -121,14 +129,20 @@ export default function Dashboard({user}:DashboardProps) {
               {item.public && (
                 <div className={styles.tagContainer}>
                   <label className={styles.tag}>Pública</label>
-                  <button className={styles.shareButton}>
+                  <button className={styles.shareButton} onClick={() => handleShare(item.id)}>
                     <FiShare2 size={22} color='#3183ff'/>
                   </button>
                 </div>
               )}
               <div className={styles.taskContent}>
-                <p>{item.tarefa}</p>
-                <button className={styles.tashButton}>
+                {item.public  ? (
+                  <Link href={`/task/${item.id}`}>
+                    <p>{item.tarefa}</p>
+                  </Link>
+                ) : (
+                  <p>{item.tarefa}</p>
+                )}
+                <button className={styles.tashButton} onClick={() => handleDelete(item.id)}>
                   <FaTrash size={22} color='#ea3140'/>
                 </button>
               </div>
