@@ -50,3 +50,35 @@
   color: #0f0f0f;
   cursor: not-allowed;
 }
+
+.comment{
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.headComment{
+  display: flex;
+  align-items: center;
+} 
+
+.commentsLabel{
+  font-weight: bold;
+  background-color: #ccc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-right: 8px;
+  color: #0f0f0f;
+}
+
+.buttonTrash{
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.comment p{
+  margin: 14px 0 0 0;
+  white-space: pre-wrap;
+}

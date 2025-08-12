@@ -2,11 +2,11 @@ import Head from 'next/head';
 import styles from './styles.module.css';
 import { GetServerSideProps } from 'next';
 import {db} from '@/services/firebaseConnection'; 
-import { doc, collection, query, where, getDoc, addDoc } from 'firebase/firestore';
+import { doc, collection, query, where, getDoc, getDocs, addDoc, deleteDoc } from 'firebase/firestore';
 import { Textarea } from '@/components/textarea';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useSession } from 'next-auth/react';
-
+import { FaTrash} from 'react-icons/fa';
 interface TaskProps{
   item:{
     id: string;
@@ -15,12 +15,22 @@ interface TaskProps{
     public: boolean;
     user: string;
   }
+  allComments: CommentProps[];
+}
+
+interface CommentProps {
+  id: string;
+  comment: string;
+  taskId: string;
+  user: string;
+  name: string;
 }
 
 
-export default function TaskPage({item} : TaskProps) {
+export default function TaskPage({item, allComments} : TaskProps) {
   const {data: session} = useSession();
   const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<CommentProps[]>(allComments || []);
 
   async function handleRegisterComment(e: FormEvent) {
     e.preventDefault();
@@ -44,12 +54,36 @@ export default function TaskPage({item} : TaskProps) {
         taskId: item?.id,
       });
 
+      const newComment = {
+        id: docRef.id,
+        comment: comment,
+        user: session.user?.email,
+        name: session.user?.name,
+        taskId: item?.id,
+      }
+
+      setComments((oldItems) => [...oldItems, newComment]);
+
       alert('Comentário registrado com sucesso!');
 
       setComment('')
     }catch(error) {
       console.log(error);
       alert('Erro ao registrar comentário!');
+    }
+  }
+
+  async function handleDelete(id: string) {
+    const docRef = doc(db, `comments`, id);
+
+    try{
+      await deleteDoc(docRef);
+      let updatedComments = comments.filter(item => item.id !== id);
+      alert('Comentário deletado com sucesso!');
+      setComments(updatedComments);
+    } catch(error) {
+      console.error("Erro ao deletar comentário:", error);
+      alert('Erro ao deletar comentário!');
     }
   }
 
@@ -83,6 +117,25 @@ export default function TaskPage({item} : TaskProps) {
             </button>
           </form>
         </section>
+
+        <section className={styles.commentsContainer}>
+          <h2>Comentários</h2>
+          {comments.length === 0 ? (
+            <span>Nenhum comentário registrado!</span>
+          ) : comments.map((item) => (
+            <article key={item.id} className={styles.comment}>
+              <div className={styles.headComment}>
+                <label className={styles.commentsLabel}>{item.name}</label>
+                {session?.user?.email === item.user && (
+                  <button className={styles.buttonTrash} onClick={() => handleDelete(item.id)}>
+                    <FaTrash color='#EA3140' size={18} />
+                  </button>
+                )}
+              </div>
+              <p>{item.comment}</p>
+            </article>
+          ))}
+        </section>
       </main>
     </>
   )
@@ -91,6 +144,20 @@ export default function TaskPage({item} : TaskProps) {
 export const getServerSideProps: GetServerSideProps = async ({params}) => {
   const id = params?.id as string;
   const docRef = doc(db, 'tasks', id);
+
+  const q = query(collection(db, 'comments'), where('taskId', '==', id));
+  const snapshotComments = await getDocs(q);
+  let allComments: CommentProps[] = [];
+  snapshotComments.forEach((doc) => {
+    allComments.push({
+      id: doc.id,
+      comment: doc.data().comment,
+      taskId: doc.data().taskId,
+      user: doc.data().user,
+      name: doc.data().name,
+    });
+  });
+
   const snapshot = await getDoc(docRef);
 
   if (!snapshot.exists()) {
@@ -124,6 +191,7 @@ export const getServerSideProps: GetServerSideProps = async ({params}) => {
   return {
     props: {
       item: task,
+      allComments: allComments,
     },
   };
 };
